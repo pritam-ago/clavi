@@ -29,11 +29,11 @@ async function callGeminiAPI(htmlContent, callback) {
   const prompt = `
     You are an assistant that extracts and summarizes the most important content from a web page for focus mode.\n
     Given the following HTML, do the following:
-    - Identify and keep only the main content, headings, and essential navigation.
+    - Identify and keep the main content, headings, essential navigation, and ALL important interactive elements (such as primary action buttons like “Buy”, “Add to Cart”, “Checkout”, and any other buttons or links necessary for the main functionality of the page).
     - Analyze all images on the page. Sort them by their importance or relevance to the main content.
     - Include only the most important images (with their alt text or captions if available) in the minimal HTML output.
-    - Remove ads, sidebars, popups, and non-essential elements.
-    - Respond ONLY with the minimal, readable HTML that includes the sorted important images and their context.
+    - Remove ads, sidebars, popups, and non-essential elements that are not related to the main content or main actions.
+    - Respond ONLY with the minimal, readable HTML that includes the sorted important images, their context, and all preserved interactive elements.
     
     HTML:
     ${htmlContent.innerHTML}
@@ -94,6 +94,50 @@ function showOverlay(minimalHTML) {
   document.documentElement.classList.add(THEME_CLASS_PREFIX + currentTheme);
   // Exit button
   overlay.querySelector('#neuroext-exit-btn').onclick = removeOverlay;
+
+  // Rewrite all links to use the current domain if not already
+  const links = overlay.querySelectorAll('a[href]');
+  links.forEach(link => {
+    try {
+      const url = new URL(link.href, location.href);
+      if (url.hostname !== location.hostname) {
+        // Rewrite to current domain, preserve path/query/hash
+        link.href = location.protocol + '//' + location.hostname + url.pathname + url.search + url.hash;
+      }
+    } catch (e) { /* ignore invalid URLs */ }
+  });
+
+  // Intercept link clicks for in-overlay navigation
+  overlay.addEventListener('click', async function(e) {
+    const a = e.target.closest('a');
+    if (a && a.href) {
+      try {
+        let linkUrl = new URL(a.href, location.href);
+        // If current page is https, link is http, and same hostname, upgrade to https
+        if (location.protocol === 'https:' && linkUrl.protocol === 'http:' && linkUrl.hostname === location.hostname) {
+          linkUrl = new URL(linkUrl.href.replace(/^http:/, 'https:'));
+        }
+        if (linkUrl.hostname === location.hostname) {
+          e.preventDefault();
+          showLoadingOverlay();
+          // Fetch the new page's HTML
+          const resp = await fetch(linkUrl.href, { credentials: 'include' });
+          const text = await resp.text();
+          // Create a DOM to extract main content
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(text, 'text/html');
+          let main = doc.querySelector('main') || doc.querySelector('article') || doc.body;
+          // Clone to avoid issues
+          main = main.cloneNode(true);
+          callGeminiAPI(main, (minimalHTML) => {
+            showOverlay(minimalHTML);
+          });
+        }
+      } catch (err) {
+        // fallback: let the link behave normally
+      }
+    }
+  });
 }
 
 function showLoadingOverlay() {
@@ -182,6 +226,47 @@ function injectOverlayStyles() {
       color: #666;
       margin-top: 4px;
       font-style: italic;
+    }
+    /* Enhanced Button Styling */
+    #${OVERLAY_ID} button, #${OVERLAY_ID} input[type="button"], #${OVERLAY_ID} input[type="submit"] {
+      background: linear-gradient(90deg, #6c63ff 0%, #7c3aed 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 28px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #6c63ff22;
+      margin: 12px 8px 12px 0;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+      outline: none;
+      display: inline-block;
+    }
+    #${OVERLAY_ID} button:hover, #${OVERLAY_ID} input[type="button"]:hover, #${OVERLAY_ID} input[type="submit"]:hover {
+      background: linear-gradient(90deg, #7c3aed 0%, #6c63ff 100%);
+      box-shadow: 0 4px 16px #6c63ff33;
+      transform: translateY(-2px) scale(1.04);
+    }
+    #${OVERLAY_ID} button:active, #${OVERLAY_ID} input[type="button"]:active, #${OVERLAY_ID} input[type="submit"]:active {
+      background: #6c63ff;
+      box-shadow: 0 1px 4px #6c63ff22;
+      transform: scale(0.98);
+    }
+    /* Enhanced Link Styling */
+    #${OVERLAY_ID} a {
+      color: #6c63ff;
+      text-decoration: underline;
+      font-weight: 500;
+      transition: color 0.2s, background 0.2s;
+      border-radius: 4px;
+      padding: 2px 4px;
+    }
+    #${OVERLAY_ID} a:hover, #${OVERLAY_ID} a:focus {
+      color: #fff;
+      background: #6c63ff;
+      text-decoration: none;
+      outline: none;
     }
     /* Calming Theme */
     .${THEME_CLASS_PREFIX}calming #${OVERLAY_ID} { background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%); color: #333; }
