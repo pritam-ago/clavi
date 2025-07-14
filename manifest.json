@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "neuroEXT ADHD Focus",
+  "name": "clavi – AI Clarity Viewer",
   "version": "1.0.0",
-  "description": "ADHD support Chrome extension with focus modes, Pomodoro timer, and calming UI.",
+  "description": "AI-powered Chrome extension : minimalize web pages and calming themes.",
   "action": {
     "default_popup": "popup.html"
   },
