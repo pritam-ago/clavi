@@ -89,7 +89,6 @@ function showOverlay(minimalHTML) {
     height: '100vh',
     zIndex: 999999,
     overflow: 'auto',
-    background: '#fff', // changed from rgba(255,255,255,0.98)
     transition: 'background 0.3s',
   });
   document.body.appendChild(overlay);
@@ -168,7 +167,6 @@ function showLoadingOverlay() {
     height: '100vh',
     zIndex: 999999,
     overflow: 'auto',
-    background: '#fff', // changed from rgba(255,255,255,0.98)
     transition: 'background 0.3s',
   });
   document.body.appendChild(overlay);
@@ -178,25 +176,68 @@ function showLoadingOverlay() {
   overlay.querySelector('#neuroext-exit-btn').onclick = removeOverlay;
 }
 
-function setTheme(theme) {
+function setTheme(theme, mode) {
   currentTheme = theme;
   const overlay = document.getElementById(OVERLAY_ID);
-  if (overlay) {
-    overlay.className = THEME_CLASS_PREFIX + theme;
-  }
+  // Remove all theme/mode classes
   document.documentElement.classList.remove(
-    ...Array.from(document.documentElement.classList).filter(c => c.startsWith(THEME_CLASS_PREFIX))
+    ...Array.from(document.documentElement.classList).filter(c => c.startsWith(THEME_CLASS_PREFIX) || c === 'light' || c === 'dark')
   );
-  document.documentElement.classList.add(THEME_CLASS_PREFIX + theme);
+  // Add new theme and mode classes
+  document.documentElement.classList.add(THEME_CLASS_PREFIX + theme, mode);
+  if (overlay) {
+    overlay.className = THEME_CLASS_PREFIX + theme + ' ' + mode;
+  }
 }
 
-// Add overlay styles for themes
+// Update injectOverlayStyles to add dark/light mode for each theme
 function injectOverlayStyles() {
   if (document.getElementById('neuroext-overlay-style')) return;
   const style = document.createElement('style');
   style.id = 'neuroext-overlay-style';
   style.textContent = `
-    #${OVERLAY_ID} { font-family: 'Segoe UI', Arial, sans-serif; }
+    :root {
+      --calming-bg-light: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+      --calming-bg-dark: #000;
+      --calming-text-light: #333;
+      --calming-text-dark: #e0e7ff;
+      --gentle-bg-light: linear-gradient(120deg, #fdf6e3 0%, #e0f7fa 100%);
+      --gentle-bg-dark: #000;
+      --gentle-text-light: #444;
+      --gentle-text-dark: #fdf6e3;
+      --high-bg-light: #fff;
+      --high-bg-dark: #000;
+      --high-text-light: #000;
+      --high-text-dark: #fff;
+    }
+    .${THEME_CLASS_PREFIX}calming.light #${OVERLAY_ID} {
+      background: var(--calming-bg-light);
+      color: var(--calming-text-light);
+    }
+    .${THEME_CLASS_PREFIX}calming.dark #${OVERLAY_ID} {
+      background: var(--calming-bg-dark);
+      color: var(--calming-text-dark);
+    }
+    .${THEME_CLASS_PREFIX}gentle.light #${OVERLAY_ID} {
+      background: var(--gentle-bg-light);
+      color: var(--gentle-text-light);
+      font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif;
+    }
+    .${THEME_CLASS_PREFIX}gentle.dark #${OVERLAY_ID} {
+      background: var(--gentle-bg-dark);
+      color: var(--gentle-text-dark);
+      font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif;
+    }
+    .${THEME_CLASS_PREFIX}high-contrast.light #${OVERLAY_ID} {
+      background: var(--high-bg-light);
+      color: var(--high-text-light);
+      font-family: 'Arial Black', Arial, sans-serif;
+    }
+    .${THEME_CLASS_PREFIX}high-contrast.dark #${OVERLAY_ID} {
+      background: var(--high-bg-dark);
+      color: var(--high-text-dark);
+      font-family: 'Arial Black', Arial, sans-serif;
+    }
     #${OVERLAY_ID} .neuroext-overlay-bar {
       display: flex; justify-content: space-between; align-items: center;
       padding: 10px 18px; font-size: 1.1em; font-weight: 600;
@@ -207,13 +248,19 @@ function injectOverlayStyles() {
       top: 0;
       z-index: 1;
     }
+    .${THEME_CLASS_PREFIX}calming.dark #${OVERLAY_ID} .neuroext-overlay-bar,
+    .${THEME_CLASS_PREFIX}gentle.dark #${OVERLAY_ID} .neuroext-overlay-bar,
+    .${THEME_CLASS_PREFIX}high-contrast.dark #${OVERLAY_ID} .neuroext-overlay-bar {
+      background: #232946;
+      color: #e0e7ff;
+      border-bottom: 1px solid #393e6e;
+    }
     #${OVERLAY_ID} .neuroext-overlay-bar button {
       background: none; border: none; font-size: 1.5em; cursor: pointer; color: #888;
       transition: color 0.2s;
     }
     #${OVERLAY_ID} .neuroext-overlay-bar button:hover { color: #ff1744; }
     #${OVERLAY_ID} .neuroext-overlay-content { padding: 24px 18px; max-width: 900px; margin: 0 auto; }
-    /* Image and Figure Styling */
     #${OVERLAY_ID} img {
       display: block;
       margin: 24px auto 12px auto;
@@ -233,7 +280,6 @@ function injectOverlayStyles() {
       margin-top: 4px;
       font-style: italic;
     }
-    /* Enhanced Button Styling */
     #${OVERLAY_ID} button, #${OVERLAY_ID} input[type="button"], #${OVERLAY_ID} input[type="submit"] {
       background: linear-gradient(90deg, #6c63ff 0%, #7c3aed 100%);
       color: #fff;
@@ -259,7 +305,6 @@ function injectOverlayStyles() {
       box-shadow: 0 1px 4px #6c63ff22;
       transform: scale(0.98);
     }
-    /* Enhanced Link Styling */
     #${OVERLAY_ID} a {
       color: #6c63ff;
       text-decoration: underline;
@@ -274,17 +319,6 @@ function injectOverlayStyles() {
       text-decoration: none;
       outline: none;
     }
-    /* Calming Theme */
-    .${THEME_CLASS_PREFIX}calming #${OVERLAY_ID} { background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%); color: #333; }
-    .${THEME_CLASS_PREFIX}calming #${OVERLAY_ID} .neuroext-overlay-bar { background: #e0e7ff; color: #6c63ff; }
-    /* Gentle Theme */
-    .${THEME_CLASS_PREFIX}gentle #${OVERLAY_ID} { background: linear-gradient(120deg, #fdf6e3 0%, #e0f7fa 100%); color: #444; font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif; }
-    .${THEME_CLASS_PREFIX}gentle #${OVERLAY_ID} .neuroext-overlay-bar { background: #ffe082; color: #7c3aed; }
-    /* High Contrast Theme */
-    .${THEME_CLASS_PREFIX}high-contrast #${OVERLAY_ID} { background: #fff; color: #000; font-family: 'Arial Black', Arial, sans-serif; }
-    .${THEME_CLASS_PREFIX}high-contrast #${OVERLAY_ID} .neuroext-overlay-bar { background: #000; color: #fff; }
-    .${THEME_CLASS_PREFIX}high-contrast #${OVERLAY_ID} .neuroext-overlay-bar button { color: #fff; }
-    .${THEME_CLASS_PREFIX}high-contrast #${OVERLAY_ID} .neuroext-overlay-bar button:hover { color: #ff1744; }
   `;
   document.head.appendChild(style);
 }
@@ -300,6 +334,6 @@ chrome.runtime.onMessage.addListener((msg) => {
     });
   }
   if (msg.type === 'THEME_CHANGE') {
-    setTheme(msg.theme);
+    setTheme(msg.theme, msg.mode);
   }
 }); 

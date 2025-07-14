@@ -10,19 +10,52 @@ aiBtn.onclick = () => {
   }
 };
 
-// --- Theme Switcher ---
-const themeSelect = document.getElementById('theme-select');
-themeSelect.addEventListener('change', () => {
+// --- Theme and Mode Switcher ---
+const modeToggle = document.getElementById('mode-toggle-checkbox');
+const modeLabel = document.getElementById('mode-label');
+
+function applyThemeAndMode(theme, mode) {
+  document.body.classList.remove('calming', 'gentle', 'high-contrast', 'light', 'dark');
+  document.body.classList.add(theme, mode);
+  modeLabel.textContent = mode === 'dark' ? 'Dark Mode' : 'Light Mode';
+  // Send to content script
   if (chrome.tabs) {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
       if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, { type: 'THEME_CHANGE', theme: themeSelect.value });
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'THEME_CHANGE', theme: theme, mode: mode });
       }
     });
   }
+}
+
+function saveThemeAndMode(theme, mode) {
+  chrome.storage.local.set({ theme: theme, mode: mode });
+}
+
+// On theme change
+const themeSelect = document.getElementById('theme-select');
+themeSelect.addEventListener('change', () => {
+  const theme = themeSelect.value;
+  const mode = modeToggle.checked ? 'dark' : 'light';
+  applyThemeAndMode(theme, mode);
+  saveThemeAndMode(theme, mode);
 });
-chrome.storage.local.get('focusMode', ({ focusMode }) => {
-  modeSelect.value = focusMode || 'deep';
+
+// On mode toggle
+modeToggle.addEventListener('change', () => {
+  const theme = themeSelect.value;
+  const mode = modeToggle.checked ? 'dark' : 'light';
+  applyThemeAndMode(theme, mode);
+  saveThemeAndMode(theme, mode);
+});
+
+// Restore last used theme and mode
+chrome.storage.local.get(['theme', 'mode'], ({ theme, mode }) => {
+  theme = theme || 'calming';
+  mode = mode || 'light';
+  themeSelect.value = theme;
+  modeToggle.checked = (mode === 'dark');
+  applyThemeAndMode(theme, mode);
 });
 
 // --- Pomodoro Timer ---
