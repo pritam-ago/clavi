@@ -197,63 +197,192 @@ function injectOverlayStyles() {
   style.id = 'clavi-overlay-style';
   style.textContent = `
     :root {
-      --calming-bg-light: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
-      --calming-bg-dark: #000;
-      --calming-text-light: #333;
-      --calming-text-dark: #e0e7ff;
-      --gentle-bg-light: linear-gradient(120deg, #fdf6e3 0%, #e0f7fa 100%);
-      --gentle-bg-dark: #000;
-      --gentle-text-light: #444;
+      /* Calming Theme */
+      --calming-bg-light: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+      --calming-bg-dark: linear-gradient(135deg, #102542 0%, #19335c 100%);
+      --calming-accent: #7ed6df;
+      --calming-accent-dark: #48b1bf;
+      --calming-text-light: #14505c;
+      --calming-text-dark: #e0f7fa;
+      --calming-bar-bg-light: linear-gradient(90deg, #b2ebf2 0%, #e0f7fa 100%);
+      --calming-bar-bg-dark: #19335c;
+      --calming-border: #b2ebf2;
+      --calming-border-dark: #19335c;
+      /* Gentle Theme */
+      --gentle-bg-light: linear-gradient(120deg, #fff7fa 0%, #e6f7ff 100%);
+      --gentle-bg-dark: linear-gradient(120deg, #232946 0%, #393e6e 100%);
+      --gentle-accent: #f7cac9;
+      --gentle-accent-dark: #b5ead7;
+      --gentle-text-light: #6d4c41;
       --gentle-text-dark: #fdf6e3;
+      --gentle-bar-bg-light: linear-gradient(90deg, #f7cac9 0%, #b5ead7 100%);
+      --gentle-bar-bg-dark: #393e6e;
+      --gentle-border: #f7cac9;
+      --gentle-border-dark: #393e6e;
+      /* High Contrast Theme */
       --high-bg-light: #fff;
       --high-bg-dark: #000;
+      --high-accent: #ffd600;
       --high-text-light: #000;
       --high-text-dark: #fff;
+      --high-bar-bg-light: #ffd600;
+      --high-bar-bg-dark: #222;
+      --high-border: #ffd600;
+      --high-border-dark: #ffd600;
+      --high-focus: 3px solid #ffd600;
     }
+    /* Calming Theme */
     .${THEME_CLASS_PREFIX}calming.light #${OVERLAY_ID} {
       background: var(--calming-bg-light);
       color: var(--calming-text-light);
+      border-radius: 18px;
+      box-shadow: 0 8px 36px 0 #7ed6df33, 0 1.5px 8px #7ed6df22;
+      font-size: 1.05em;
+      line-height: 1.7;
     }
     .${THEME_CLASS_PREFIX}calming.dark #${OVERLAY_ID} {
       background: var(--calming-bg-dark);
       color: var(--calming-text-dark);
+      border-radius: 18px;
+      box-shadow: 0 8px 36px 0 #48b1bf33, 0 1.5px 8px #48b1bf22;
+      font-size: 1.05em;
+      line-height: 1.7;
     }
+    .${THEME_CLASS_PREFIX}calming.light #${OVERLAY_ID} .clavi-overlay-bar {
+      background: var(--calming-bar-bg-light);
+      color: var(--calming-text-light);
+      border-bottom: 1.5px solid var(--calming-border);
+    }
+    .${THEME_CLASS_PREFIX}calming.dark #${OVERLAY_ID} .clavi-overlay-bar {
+      background: var(--calming-bar-bg-dark);
+      color: var(--calming-text-dark);
+      border-bottom: 1.5px solid var(--calming-border-dark);
+    }
+    .${THEME_CLASS_PREFIX}calming.light #${OVERLAY_ID} button,
+    .${THEME_CLASS_PREFIX}calming.dark #${OVERLAY_ID} button {
+      background: linear-gradient(90deg, var(--calming-accent) 0%, var(--calming-accent-dark) 100%);
+      color: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 12px #7ed6df33;
+      font-weight: 700;
+      font-size: 1.08em;
+    }
+    .${THEME_CLASS_PREFIX}calming.light #${OVERLAY_ID} button:hover,
+    .${THEME_CLASS_PREFIX}calming.dark #${OVERLAY_ID} button:hover {
+      background: linear-gradient(90deg, var(--calming-accent-dark) 0%, var(--calming-accent) 100%);
+    }
+    /* Gentle Theme */
     .${THEME_CLASS_PREFIX}gentle.light #${OVERLAY_ID} {
       background: var(--gentle-bg-light);
       color: var(--gentle-text-light);
+      border-radius: 22px;
+      box-shadow: 0 8px 36px 0 #f7cac933, 0 1.5px 8px #b5ead722;
+      font-size: 1.08em;
+      line-height: 1.8;
       font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif;
     }
     .${THEME_CLASS_PREFIX}gentle.dark #${OVERLAY_ID} {
       background: var(--gentle-bg-dark);
       color: var(--gentle-text-dark);
+      border-radius: 22px;
+      box-shadow: 0 8px 36px 0 #b5ead733, 0 1.5px 8px #f7cac922;
+      font-size: 1.08em;
+      line-height: 1.8;
       font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif;
     }
+    .${THEME_CLASS_PREFIX}gentle.light #${OVERLAY_ID} .clavi-overlay-bar {
+      background: var(--gentle-bar-bg-light);
+      color: var(--gentle-text-light);
+      border-bottom: 1.5px solid var(--gentle-border);
+    }
+    .${THEME_CLASS_PREFIX}gentle.dark #${OVERLAY_ID} .clavi-overlay-bar {
+      background: var(--gentle-bar-bg-dark);
+      color: var(--gentle-text-dark);
+      border-bottom: 1.5px solid var(--gentle-border-dark);
+    }
+    .${THEME_CLASS_PREFIX}gentle.light #${OVERLAY_ID} button,
+    .${THEME_CLASS_PREFIX}gentle.dark #${OVERLAY_ID} button {
+      background: linear-gradient(90deg, var(--gentle-accent) 0%, var(--gentle-accent-dark) 100%);
+      color: #6d4c41;
+      border-radius: 18px;
+      box-shadow: 0 2px 12px #f7cac933;
+      font-weight: 700;
+      font-size: 1.08em;
+    }
+    .${THEME_CLASS_PREFIX}gentle.light #${OVERLAY_ID} button:hover,
+    .${THEME_CLASS_PREFIX}gentle.dark #${OVERLAY_ID} button:hover {
+      background: linear-gradient(90deg, var(--gentle-accent-dark) 0%, var(--gentle-accent) 100%);
+    }
+    /* High Contrast Theme */
     .${THEME_CLASS_PREFIX}high-contrast.light #${OVERLAY_ID} {
       background: var(--high-bg-light);
       color: var(--high-text-light);
+      border-radius: 0px;
+      box-shadow: 0 8px 36px 0 #ffd60055, 0 1.5px 8px #ffd60033;
+      font-size: 1.18em;
+      line-height: 1.6;
       font-family: 'Arial Black', Arial, sans-serif;
     }
     .${THEME_CLASS_PREFIX}high-contrast.dark #${OVERLAY_ID} {
       background: var(--high-bg-dark);
       color: var(--high-text-dark);
+      border-radius: 0px;
+      box-shadow: 0 8px 36px 0 #ffd60055, 0 1.5px 8px #ffd60033;
+      font-size: 1.18em;
+      line-height: 1.6;
       font-family: 'Arial Black', Arial, sans-serif;
     }
+    .${THEME_CLASS_PREFIX}high-contrast.light #${OVERLAY_ID} .clavi-overlay-bar {
+      background: var(--high-bar-bg-light);
+      color: var(--high-text-light);
+      border-bottom: 2.5px solid var(--high-border);
+    }
+    .${THEME_CLASS_PREFIX}high-contrast.dark #${OVERLAY_ID} .clavi-overlay-bar {
+      background: var(--high-bar-bg-dark);
+      color: var(--high-text-dark);
+      border-bottom: 2.5px solid var(--high-border-dark);
+    }
+    .${THEME_CLASS_PREFIX}high-contrast.light #${OVERLAY_ID} button,
+    .${THEME_CLASS_PREFIX}high-contrast.dark #${OVERLAY_ID} button {
+      background: var(--high-accent);
+      color: #000;
+      border-radius: 0px;
+      font-weight: 900;
+      font-size: 1.22em;
+      border: 2.5px solid var(--high-border);
+      box-shadow: 0 2px 12px #ffd60055;
+    }
+    .${THEME_CLASS_PREFIX}high-contrast.light #${OVERLAY_ID} button:hover,
+    .${THEME_CLASS_PREFIX}high-contrast.dark #${OVERLAY_ID} button:hover {
+      background: #fff;
+      color: #000;
+      border: 2.5px solid var(--high-border);
+    }
+    .${THEME_CLASS_PREFIX}high-contrast.light #${OVERLAY_ID} a,
+    .${THEME_CLASS_PREFIX}high-contrast.dark #${OVERLAY_ID} a {
+      color: var(--high-accent);
+      font-weight: 900;
+      font-size: 1.13em;
+      text-decoration: underline;
+      outline: none;
+    }
+    .${THEME_CLASS_PREFIX}high-contrast.light #${OVERLAY_ID} a:focus,
+    .${THEME_CLASS_PREFIX}high-contrast.dark #${OVERLAY_ID} a:focus {
+      outline: var(--high-focus) !important;
+      background: #222;
+      color: var(--high-accent);
+    }
+    .${THEME_CLASS_PREFIX}high-contrast.light #${OVERLAY_ID} *,
+    .${THEME_CLASS_PREFIX}high-contrast.dark #${OVERLAY_ID} * {
+      outline-color: var(--high-accent);
+    }
+    /* Shared overlay content styles */
     #${OVERLAY_ID} .clavi-overlay-bar {
       display: flex; justify-content: space-between; align-items: center;
       padding: 10px 18px; font-size: 1.1em; font-weight: 600;
-      border-bottom: 1px solid #e0e0e0;
-      background: #f6f7fb;
-      color: #333;
       position: sticky;
       top: 0;
       z-index: 1;
-    }
-    .${THEME_CLASS_PREFIX}calming.dark #${OVERLAY_ID} .clavi-overlay-bar,
-    .${THEME_CLASS_PREFIX}gentle.dark #${OVERLAY_ID} .clavi-overlay-bar,
-    .${THEME_CLASS_PREFIX}high-contrast.dark #${OVERLAY_ID} .clavi-overlay-bar {
-      background: #232946;
-      color: #e0e7ff;
-      border-bottom: 1px solid #393e6e;
     }
     #${OVERLAY_ID} .clavi-overlay-bar button {
       background: none; border: none; font-size: 1.5em; cursor: pointer; color: #888;
@@ -281,32 +410,13 @@ function injectOverlayStyles() {
       font-style: italic;
     }
     #${OVERLAY_ID} button, #${OVERLAY_ID} input[type="button"], #${OVERLAY_ID} input[type="submit"] {
-      background: linear-gradient(90deg, #6c63ff 0%, #7c3aed 100%);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
       padding: 12px 28px;
-      font-size: 1em;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 2px 8px #6c63ff22;
-      margin: 12px 8px 12px 0;
       transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
       outline: none;
       display: inline-block;
-    }
-    #${OVERLAY_ID} button:hover, #${OVERLAY_ID} input[type="button"]:hover, #${OVERLAY_ID} input[type="submit"]:hover {
-      background: linear-gradient(90deg, #7c3aed 0%, #6c63ff 100%);
-      box-shadow: 0 4px 16px #6c63ff33;
-      transform: translateY(-2px) scale(1.04);
-    }
-    #${OVERLAY_ID} button:active, #${OVERLAY_ID} input[type="button"]:active, #${OVERLAY_ID} input[type="submit"]:active {
-      background: #6c63ff;
-      box-shadow: 0 1px 4px #6c63ff22;
-      transform: scale(0.98);
+      margin: 12px 8px 12px 0;
     }
     #${OVERLAY_ID} a {
-      color: #6c63ff;
       text-decoration: underline;
       font-weight: 500;
       transition: color 0.2s, background 0.2s;
@@ -314,8 +424,6 @@ function injectOverlayStyles() {
       padding: 2px 4px;
     }
     #${OVERLAY_ID} a:hover, #${OVERLAY_ID} a:focus {
-      color: #fff;
-      background: #6c63ff;
       text-decoration: none;
       outline: none;
     }
