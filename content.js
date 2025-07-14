@@ -11,6 +11,8 @@ function removeOverlay() {
   document.documentElement.classList.remove(
     ...Array.from(document.documentElement.classList).filter(c => c.startsWith(THEME_CLASS_PREFIX))
   );
+  // Restore scrolling
+  document.documentElement.style.overflow = '';
 }
 
 function extractMainContent() {
@@ -87,11 +89,13 @@ function showOverlay(minimalHTML) {
     height: '100vh',
     zIndex: 999999,
     overflow: 'auto',
-    background: 'rgba(255,255,255,0.98)',
+    background: '#fff', // changed from rgba(255,255,255,0.98)
     transition: 'background 0.3s',
   });
   document.body.appendChild(overlay);
   document.documentElement.classList.add(THEME_CLASS_PREFIX + currentTheme);
+  // Prevent background scroll
+  document.documentElement.style.overflow = 'hidden';
   // Exit button
   overlay.querySelector('#neuroext-exit-btn').onclick = removeOverlay;
 
@@ -164,11 +168,13 @@ function showLoadingOverlay() {
     height: '100vh',
     zIndex: 999999,
     overflow: 'auto',
-    background: 'rgba(255,255,255,0.98)',
+    background: '#fff', // changed from rgba(255,255,255,0.98)
     transition: 'background 0.3s',
   });
   document.body.appendChild(overlay);
   document.documentElement.classList.add(THEME_CLASS_PREFIX + currentTheme);
+  // Prevent background scroll
+  document.documentElement.style.overflow = 'hidden';
   overlay.querySelector('#neuroext-exit-btn').onclick = removeOverlay;
 }
 
