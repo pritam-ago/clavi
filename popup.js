@@ -1,10 +1,15 @@
 // --- AI Minimalize Button ---
 const aiBtn = document.getElementById('ai-minimalize-btn');
+const contentOnlyToggle = document.getElementById('contentonly-toggle-checkbox');
 aiBtn.onclick = () => {
   if (chrome.tabs) {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
       if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, { type: 'AI_MINIMALIZE' });
+        if (contentOnlyToggle.checked) {
+          chrome.tabs.sendMessage(tabs[0].id, { type: 'AI_CONTENT_ONLY' });
+        } else {
+          chrome.tabs.sendMessage(tabs[0].id, { type: 'AI_MINIMALIZE' });
+        }
       }
     });
   }

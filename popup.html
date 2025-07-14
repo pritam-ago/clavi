@@ -3,17 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>neuroEXT ADHD Focus</title>
+  <title>clavi – AI Clarity Viewer</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>neuroEXT</h1>
-      <span class="subtitle">AI Minimalizer</span>
+      <h1>clavi</h1>
+      <span class="subtitle">AI Clarity Viewer</span>
     </header>
     <section class="ai-minimalize">
       <button id="ai-minimalize-btn">Summarize Page</button>
+      <div class="contentonly-toggle">
+        <label class="switch">
+          <input type="checkbox" id="contentonly-toggle-checkbox">
+          <span class="slider"></span>
+        </label>
+        <span id="contentonly-label">Content Only Mode</span>
+      </div>
       <label for="theme-select">Theme:</label>
       <select id="theme-select">
         <option value="calming">Calming</option>
