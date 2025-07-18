@@ -1,5 +1,3 @@
-// clavi: AI Minimalization and Theme Overlay
-// Receives messages from popup to minimalize page and change theme
 
 const OVERLAY_ID = 'clavi-ai-minimal-overlay';
 const THEME_CLASS_PREFIX = 'clavi-theme-';
@@ -11,12 +9,10 @@ function removeOverlay() {
   document.documentElement.classList.remove(
     ...Array.from(document.documentElement.classList).filter(c => c.startsWith(THEME_CLASS_PREFIX))
   );
-  // Restore scrolling
   document.documentElement.style.overflow = '';
 }
 
 function extractMainContent() {
-  // Try to extract <main>, <article>, or fallback to <body>
   let main = document.querySelector('main');
   if (!main) main = document.querySelector('article');
   if (!main) main = document.body;
@@ -29,16 +25,20 @@ async function callGeminiAPI(htmlContent, callback) {
   const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey;
 
   const prompt = `
-    You are an assistant that extracts and summarizes the most important content from a web page for focus mode.\n
-    Given the following HTML, do the following:
-    - Identify and keep the main content, headings, essential navigation, and ALL important interactive elements (such as primary action buttons like “Buy”, “Add to Cart”, “Checkout”, and any other buttons or links necessary for the main functionality of the page).
-    - Analyze all images on the page. Sort them by their importance or relevance to the main content.
-    - Include only the most important images (with their alt text or captions if available) in the minimal HTML output.
-    - Remove ads, sidebars, popups, and non-essential elements that are not related to the main content or main actions.
-    - Respond ONLY with the minimal, readable HTML that includes the sorted important images, their context, and all preserved interactive elements.
-    
-    HTML:
-    ${htmlContent.innerHTML}
+  You are an assistant that extracts and summarizes the most important content from a web page for focus mode.
+  
+  Given the following HTML, do the following:
+  - Identify and keep the main content, headings, essential navigation, and ALL important interactive elements (such as primary action buttons like "Buy", "Add to Cart", "Checkout", and any other buttons or links necessary for the main functionality of the page).
+  - Analyze all images on the page. Sort them by their importance or relevance to the main content.
+  - Include only the most important images (with their alt text or captions if available) in the minimal HTML output.
+  - Remove ads, sidebars, popups, and non-essential elements that are not related to the main content or main actions.
+  - Respond ONLY with the minimal HTML structure (headings, paragraphs, important images, and interactive elements) needed for the main content.
+  - Do NOT include any <html>, <head>, <body>, or <style> tags.
+  - Do NOT include any CSS or inline styles.
+  - The output will be styled by the extension, so only return the content elements.
+  
+  HTML:
+  ${htmlContent.innerHTML}
   `;
 
   const body = {
@@ -60,7 +60,6 @@ async function callGeminiAPI(htmlContent, callback) {
 }
 
 function cleanGeminiHTML(html) {
-  // Remove leading/trailing <html>, <body>, whitespace, and code block markers
   return html
     .replace(/^\s*```[a-zA-Z]*\s*/i, '') // Remove ``` or ```html at the start
     .replace(/```\s*$/i, '')              // Remove trailing ```
@@ -74,12 +73,16 @@ function showOverlay(minimalHTML) {
   const overlay = document.createElement('div');
   overlay.id = OVERLAY_ID;
   overlay.className = THEME_CLASS_PREFIX + currentTheme;
+
+  // Always wrap AI content in a semantic section
+  const wrappedHTML = `<section class="clavi-main-content">${cleanGeminiHTML(minimalHTML)}</section>`;
+
   overlay.innerHTML = `
     <div class="clavi-overlay-bar">
       <span>AI Summarized</span>
       <button id="clavi-exit-btn">×</button>
     </div>
-    <div class="clavi-overlay-content">${cleanGeminiHTML(minimalHTML)}</div>
+    <div class="clavi-overlay-content">${wrappedHTML}</div>
   `;
   Object.assign(overlay.style, {
     position: 'fixed',
@@ -93,9 +96,7 @@ function showOverlay(minimalHTML) {
   });
   document.body.appendChild(overlay);
   document.documentElement.classList.add(THEME_CLASS_PREFIX + currentTheme);
-  // Prevent background scroll
   document.documentElement.style.overflow = 'hidden';
-  // Exit button
   overlay.querySelector('#clavi-exit-btn').onclick = removeOverlay;
 
   // Rewrite all links to use the current domain if not already
@@ -110,34 +111,31 @@ function showOverlay(minimalHTML) {
     } catch (e) { /* ignore invalid URLs */ }
   });
 
-  // Intercept link clicks for in-overlay navigation
   overlay.addEventListener('click', async function(e) {
     const a = e.target.closest('a');
     if (a && a.href) {
       try {
         let linkUrl = new URL(a.href, location.href);
-        // If current page is https, link is http, and same hostname, upgrade to https
         if (location.protocol === 'https:' && linkUrl.protocol === 'http:' && linkUrl.hostname === location.hostname) {
           linkUrl = new URL(linkUrl.href.replace(/^http:/, 'https:'));
         }
         if (linkUrl.hostname === location.hostname) {
           e.preventDefault();
           showLoadingOverlay();
-          // Fetch the new page's HTML
           const resp = await fetch(linkUrl.href, { credentials: 'include' });
           const text = await resp.text();
-          // Create a DOM to extract main content
+
           const parser = new DOMParser();
           const doc = parser.parseFromString(text, 'text/html');
           let main = doc.querySelector('main') || doc.querySelector('article') || doc.body;
-          // Clone to avoid issues
+
           main = main.cloneNode(true);
           callGeminiAPI(main, (minimalHTML) => {
             showOverlay(minimalHTML);
           });
         }
       } catch (err) {
-        // fallback: let the link behave normally
+        
       }
     }
   });
@@ -279,7 +277,7 @@ function injectOverlayStyles() {
       box-shadow: 0 8px 36px 0 #f7cac933, 0 1.5px 8px #b5ead722;
       font-size: 1.08em;
       line-height: 1.8;
-      font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
     }
     .${THEME_CLASS_PREFIX}gentle.dark #${OVERLAY_ID} {
       background: var(--gentle-bg-dark);
@@ -288,7 +286,7 @@ function injectOverlayStyles() {
       box-shadow: 0 8px 36px 0 #b5ead733, 0 1.5px 8px #f7cac922;
       font-size: 1.08em;
       line-height: 1.8;
-      font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
     }
     .${THEME_CLASS_PREFIX}gentle.light #${OVERLAY_ID} .clavi-overlay-bar {
       background: var(--gentle-bar-bg-light);
@@ -321,7 +319,7 @@ function injectOverlayStyles() {
       box-shadow: 0 8px 36px 0 #ffd60055, 0 1.5px 8px #ffd60033;
       font-size: 1.18em;
       line-height: 1.6;
-      font-family: 'Arial Black', Arial, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
     }
     .${THEME_CLASS_PREFIX}high-contrast.dark #${OVERLAY_ID} {
       background: var(--high-bg-dark);
@@ -330,7 +328,7 @@ function injectOverlayStyles() {
       box-shadow: 0 8px 36px 0 #ffd60055, 0 1.5px 8px #ffd60033;
       font-size: 1.18em;
       line-height: 1.6;
-      font-family: 'Arial Black', Arial, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
     }
     .${THEME_CLASS_PREFIX}high-contrast.light #${OVERLAY_ID} .clavi-overlay-bar {
       background: var(--high-bar-bg-light);
@@ -427,11 +425,33 @@ function injectOverlayStyles() {
       text-decoration: none;
       outline: none;
     }
+    #${OVERLAY_ID} .clavi-main-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5em;
+      padding: 1em 0;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    #${OVERLAY_ID} .clavi-main-content h1,
+    #${OVERLAY_ID} .clavi-main-content h2,
+    #${OVERLAY_ID} .clavi-main-content h3 {
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+      font-weight: bold;
+    }
+    #${OVERLAY_ID} .clavi-main-content p {
+      margin: 0.5em 0;
+      line-height: 1.7;
+    }
+    #${OVERLAY_ID} .clavi-main-content button,
+    #${OVERLAY_ID} .clavi-main-content a {
+      margin-top: 1em;
+    }
   `;
   document.head.appendChild(style);
 }
 
-// Listen for messages from popup
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'AI_MINIMALIZE') {
     injectOverlayStyles();
@@ -454,7 +474,6 @@ chrome.runtime.onMessage.addListener((msg) => {
   }
 });
 
-// Add a new function for the content only mode
 async function callGeminiAPI_contentOnly(htmlContent, callback) {
   const apiKey = 'AIzaSyD6ULgZtW0R0NSue3oZOnGSZSBJ5AKbFA8';
   const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey;
